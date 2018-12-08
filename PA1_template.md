@@ -22,7 +22,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 ## Libraries recquired to run code below
 
-```{r,message=F}
+
+```r
 library('ggplot2')
 library("dplyr")
 ```
@@ -30,7 +31,8 @@ library("dplyr")
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
 data <- read.table('./activity/activity.csv',header=T,sep=',')
 ```
 
@@ -39,14 +41,30 @@ data <- read.table('./activity/activity.csv',header=T,sep=',')
 
 The total number of steps per date is calculated with the R fucntion 'aggregate' used to apply the 'sum' function for each date.
 
-```{r}
+
+```r
 # Calculate the total number of steps per day
 byday <- aggregate(steps~date,data=data,FUN=sum)
 hist(byday$steps,breaks=20)
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 # Mean and median value
 mean(byday$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(byday$steps)
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -55,21 +73,28 @@ median(byday$steps)
 The average number of steps per interval is calculated with the R fucntion 'aggregate' used to apply the 'mean' function to each interval.
 
 
-```{r}
+
+```r
 # Calculate the average number of steps per interval
 by5minint <- aggregate(steps~interval,data=data,FUN=mean)
 
 # Plot average time serie
 with(by5minint,plot(interval,steps))
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 The interval with the maximum average number of steps is calculated as follows:
 
-```{r}
+
+```r
 # Get the interval where the maximum number of steps is observed
 maxsteps <- max(by5minint$steps, na.rm = FALSE)
 by5minint$interval[which(by5minint$steps==maxsteps)]
+```
+
+```
+## [1] 835
 ```
 
 
@@ -78,10 +103,17 @@ by5minint$interval[which(by5minint$steps==maxsteps)]
 The number of NA is first calcualted.
 Then, all NA are replaced by the number of steps at teh same interval (averaged over all days).
 
-```{r}
+
+```r
 # Number of NA in the data
 sum(is.na(data$steps))
+```
 
+```
+## [1] 2304
+```
+
+```r
 # Replace NA value per the average number of steps for each interval
 data$steps_5minavg <- rep(by5minint$steps,61)
 data$steps_woNA <- ifelse(is.na(data$steps),data$steps_5minavg,data$steps)
@@ -89,14 +121,30 @@ data$steps_woNA <- ifelse(is.na(data$steps),data$steps_5minavg,data$steps)
 
 Then, the values calculated previously are again calculated without NA:
 
-```{r}
+
+```r
 # Calculate the average number of steps per interval
 byday_woNA <- aggregate(steps_woNA~date,data=data,FUN=sum)
 hist(byday_woNA$steps_woNA,breaks=20)
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
+```r
 # Mean and median value after removing the NA
 mean(byday_woNA$steps_woNA)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(byday_woNA$steps_woNA)
+```
+
+```
+## [1] 10766.19
 ```
 
 
@@ -105,7 +153,8 @@ median(byday_woNA$steps_woNA)
 The data are first discriminated between week days and weekend days.
 Then, the average per interval is calcualted for week days and weekend days.
 
-```{r}
+
+```r
 # Get days and discriminate between weekend and weekdays
 data$day <- weekdays(as.Date(data$date))
 data$week_ <- as.factor(ifelse(
@@ -120,6 +169,8 @@ by5minint <- aggregate(steps~interval+week_,data=data,FUN=mean)
 p <- qplot(interval,steps,data=by5minint,color=week_)
 p + geom_point(size = 3) + ggtitle('Average number of steps vs time for weekdays and weekend days')
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 The plot shows that the activity is higher between 5am and 8am during the week while it is higher in the afternoon and the evening during the week end.
 
